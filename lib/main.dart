@@ -1,9 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'screens/kiosk_menu_screen.dart';
+import 'screens/kiosk_home_router.dart';
+import 'services/kiosk_backend.dart';
+import 'services/moyak_api_client.dart';
+import 'services/order_recovery_store.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const KioskApplication());
+
+/// Normal launch always uses the real backend path. MyApp alone remains a
+/// dependency-free design preview for existing isolated widget tests.
+class KioskApplication extends StatefulWidget {
+  const KioskApplication({super.key});
+  @override
+  State<KioskApplication> createState() => _KioskApplicationState();
+}
+
+class _KioskApplicationState extends State<KioskApplication> {
+  late final _api = MoyakApiClient();
+  late final _backend = KioskBackend(
+    api: _api,
+    machineId: const String.fromEnvironment('MOYAK_MACHINE_ID'),
+    environment: const String.fromEnvironment('MOYAK_TEST_ENVIRONMENT'),
+    allowMutations: const bool.fromEnvironment('MOYAK_ALLOW_SERVER_MUTATIONS'),
+    recoveryStore: const PlatformOrderRecoveryStore(),
+  );
+  @override
+  void dispose() {
+    _api.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      KioskBackendScope(backend: _backend, child: const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,6 +43,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
     title: 'MOYAK',
     debugShowCheckedModeBanner: false,
+    navigatorObservers: [kioskRouteObserver],
     theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
     home: const KioskStartScreen(),
   );
@@ -30,7 +62,7 @@ class KioskStartScreen extends StatelessWidget {
       return;
     }
     Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => const KioskMenuScreen()));
+        .push(MaterialPageRoute<void>(builder: (_) => const KioskHomeRouter()));
   }
 
   @override

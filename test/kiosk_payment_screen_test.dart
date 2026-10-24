@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moyak_flutter/demo/demo_cart.dart';
 import 'package:moyak_flutter/screens/kiosk_cart_screen.dart';
 import 'package:moyak_flutter/screens/kiosk_payment_screen.dart';
+import 'package:moyak_flutter/screens/kiosk_dispensing_screen.dart';
 
 void main() {
   testWidgets(
@@ -69,14 +70,12 @@ void main() {
       expect(selected('payment-method-card'), isFalse);
       await tester.tap(find.byKey(const ValueKey('payment-complete')));
       await tester.pumpAndSettle();
-      expect(
-        find.text('테스트용 결제 화면입니다. 실제 결제·영수증 발급·약품 배출은 진행되지 않습니다.'),
-        findsOneWidget,
-      );
+      expect(find.text('개발용 미리보기 · 실제 결제 및 약 배출 없음'), findsOneWidget);
       expect(cart.totalWon, 13500);
-      await tester.tap(find.byKey(const ValueKey('payment-logout')));
+      Navigator.of(tester.element(find.byType(KioskDispensingScreen))).pop();
       await tester.pumpAndSettle();
-      expect(find.text('실제 인증이 연결되지 않아 회원 로그아웃은 수행하지 않습니다.'), findsOneWidget);
+      expect(find.byKey(const ValueKey('payment-logout')), findsNothing);
+      expect(find.text('지*민 님'), findsNothing);
       expect(cart.totalWon, 13500);
     },
   );

@@ -1,17 +1,230 @@
+import 'dart:async';
+
+import '../services/kiosk_backend.dart';
+import '../services/service_result.dart';
+import '../models/moyak_api_models.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'kiosk_auth_complete_screen.dart';
-import 'kiosk_linked_home_screen.dart';
+import 'kiosk_home_router.dart';
 
-/// UI prototype based on the supplied 1080x1920 reference for node 86:257.
-/// The displayed key and QR placeholder never initiate a real pairing session.
-class KioskDevicePairingScreen extends StatelessWidget {
+/// Existing layout, using configured machine QR APIs during normal app launch.
+class KioskDevicePairingScreen extends StatefulWidget {
   const KioskDevicePairingScreen({super.key});
+
+  @override
+  State<KioskDevicePairingScreen> createState() =>
+      _KioskDevicePairingScreenState();
+}
+
+class _KioskDevicePairingScreenState extends State<KioskDevicePairingScreen>
+    with WidgetsBindingObserver {
+  KioskBackend? _backend;
+  KioskQr? _qr;
+  Timer? _poll;
+  Timer? _expiryTimer;
+  bool _initialized = false, _fetching = false, _paired = false, _active = true;
+  String? _error;
+  int _generation = 0;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    WidgetsBinding.instance.addObserver(this);
+    _backend = KioskBackendScope.maybeOf(context);
+    if (_backend != null) Future.microtask(_begin);
+  }
+
+  @override
+  void dispose() {
+    _generation++;
+    _poll?.cancel();
+    _expiryTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _active = state == AppLifecycleState.resumed;
+    _generation++;
+    _poll?.cancel();
+    _expiryTimer?.cancel();
+    _fetching = false;
+    _backend?.invalidateSessionReads();
+    if (_active && !_paired && _backend != null) _begin();
+  }
+
+  Future<void> _begin() async {
+    if (!mounted || !_active || _fetching || _paired) return;
+    final backend = _backend!;
+    setState(() {
+      _fetching = true;
+      _error = backend.mutationError;
+    });
+    if (_error != null) {
+      setState(() => _fetching = false);
+      return;
+    }
+    final generation = _generation;
+    // Initial entry and app resume both inspect the existing session FIRST.
+    final session = await backend.querySession();
+    if (!mounted || !_active || generation != _generation) return;
+    if (session is ServiceFailure<KioskSession>) {
+      setState(() {
+        _fetching = false;
+        _error = session.error.message;
+      });
+      if (_qr != null && DateTime.now().toUtc().isBefore(_qr!.expiresAt)) {
+        _armExpiry();
+        _schedule();
+      }
+      return; // Unknown session must never trigger a reset/rotation.
+    }
+    final value = (session as ServiceSuccess<KioskSession>).value;
+    if (value.paired) {
+      _finishPairing(value);
+      return;
+    }
+    if (_qr != null && DateTime.now().toUtc().isBefore(_qr!.expiresAt)) {
+      setState(() {
+        _fetching = false;
+        _error = null;
+      });
+      _armExpiry();
+      _schedule();
+      return;
+    }
+    setState(() => _qr = null);
+    final result = await backend.rotateQr();
+    if (!mounted || !_active || generation != _generation) return;
+    setState(() {
+      _fetching = false;
+      switch (result) {
+        case ServiceSuccess<KioskQr>():
+          if (result.value.machineId != backend.machineId ||
+              !DateTime.now().toUtc().isBefore(result.value.expiresAt)) {
+            _error = '기기 QR 응답을 확인할 수 없습니다.';
+          } else {
+            _qr = result.value;
+            _error = null;
+          }
+        case ServiceFailure<KioskQr>():
+          _error = result.error.message;
+      }
+    });
+    if (_qr != null) {
+      _armExpiry();
+      _schedule();
+    }
+  }
+
+  void _finishPairing(KioskSession session) {
+    if (!mounted || !_active || _paired) return;
+    _paired = true;
+    _fetching = false;
+    _generation++;
+    _poll?.cancel();
+    _expiryTimer?.cancel();
+    _backend!.session = session;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (completionContext) => KioskAuthCompleteScreen(
+          deviceLinkOnly: true,
+          memberName: session.displayName ?? '연동 회원',
+          onPreviewContinue: () =>
+              Navigator.of(completionContext).pushAndRemoveUntil(
+                MaterialPageRoute<void>(
+                  builder: (_) => KioskHomeRouter(liveSession: session),
+                ),
+                (r) => r.isFirst,
+              ),
+        ),
+      ),
+    );
+  }
+
+  void _armExpiry() {
+    _expiryTimer?.cancel();
+    if (_qr == null) return;
+    _expiryTimer = Timer(_qr!.expiresAt.difference(DateTime.now().toUtc()), () {
+      if (!mounted || _paired) return;
+      _generation++;
+      _poll?.cancel();
+      setState(() {
+        _qr = null;
+        _fetching = false;
+        _error = 'QR 유효 시간이 지났습니다. 이전으로 돌아가 다시 시도해 주세요.';
+      });
+    });
+  }
+
+  void _schedule() {
+    _poll?.cancel();
+    _poll = Timer(const Duration(seconds: 3), _checkSession);
+  }
+
+  Future<void> _checkSession() async {
+    if (!mounted || !_active || _paired || _fetching || _qr == null) return;
+    if (!DateTime.now().toUtc().isBefore(_qr!.expiresAt)) {
+      setState(() {
+        _qr = null;
+        _error = 'QR 유효 시간이 지났습니다. 이전으로 돌아가 다시 시도해 주세요.';
+      });
+      return;
+    }
+    _fetching = true;
+    final generation = _generation;
+    final result = await _backend!.querySession();
+    if (!mounted || generation != _generation) return;
+    setState(() {
+      _fetching = false;
+      switch (result) {
+        case ServiceSuccess<KioskSession>():
+          if (result.value.machineId != _backend!.machineId) {
+            _error = '기기 세션이 일치하지 않습니다.';
+            return;
+          }
+          _error = null;
+
+        case ServiceFailure<KioskSession>():
+          _error = result.error.message;
+      }
+      if (!DateTime.now().toUtc().isBefore(_qr!.expiresAt) && !_paired) {
+        _qr = null;
+        _error = 'QR 유효 시간이 지났습니다.';
+      }
+    });
+    if (result is ServiceSuccess<KioskSession> && result.value.paired) {
+      _finishPairing(result.value);
+      return;
+    }
+    if (!_paired && _qr != null) _schedule();
+  }
+
+  Widget _liveQr() => Container(
+    color: Colors.white,
+    padding: const EdgeInsets.all(12),
+    child: _qr != null && !_paired
+        ? SvgPicture.string(_qr!.svg, semanticsLabel: '기기 연동 QR')
+        : Center(
+            child: Text(
+              _paired
+                  ? '기기 연동이 확인되었습니다.\n본인인증 및 승인 약 구매 연결은 준비 중입니다.'
+                  : _error ?? '기기 QR을 발급하는 중입니다…',
+              textAlign: TextAlign.center,
+              style: _style(20),
+            ),
+          ),
+  );
 
   // Debug-only navigation preview; never creates a verified session.
   Widget _completionPreview(BuildContext context, Widget child) {
+    if (_backend != null) return _liveQr();
     if (!kDebugMode) return child;
     return Tooltip(
       message: '테스트용: 본인인증 완료 화면 미리보기 (실제 인증 아님)',
@@ -22,7 +235,9 @@ class KioskDevicePairingScreen extends StatelessWidget {
             builder: (completionContext) => KioskAuthCompleteScreen(
               onPreviewContinue: () => Navigator.of(completionContext).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const KioskLinkedHomeScreen(),
+                  builder: (_) => const KioskHomeRouter(
+                    initialPreviewState: HomePreviewState.approvedMedicines,
+                  ),
                 ),
               ),
             ),
@@ -242,7 +457,9 @@ class KioskDevicePairingScreen extends StatelessWidget {
                   child: _completionPreview(
                     context,
                     Semantics(
-                      label: '임시 QR 모양, 실제 스캔 및 연동 불가',
+                      label: _backend == null
+                          ? '임시 QR 모양, 실제 스캔 및 연동 불가'
+                          : '서버 기기 연동 QR 영역',
                       child: ColoredBox(
                         color: const Color(0xFF7D8793),
                         child: Center(
@@ -286,7 +503,9 @@ class KioskDevicePairingScreen extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: _text(
-                          '자판기 고유인증 키: MD-2409-ROME',
+                          _backend == null
+                              ? '자판기 고유인증 키: MD-2409-ROME'
+                              : '기기 ID: ${_backend!.machineId.isEmpty ? '미설정' : _backend!.machineId}',
                           20,
                           color: _gold,
                           weight: FontWeight.w800,
@@ -301,7 +520,9 @@ class KioskDevicePairingScreen extends StatelessWidget {
                   width: 368,
                   height: 76,
                   child: Semantics(
-                    label: '스마트폰 연동 대기 표시, 디자인 예시이며 실제 연결하지 않음',
+                    label: _backend == null
+                        ? '스마트폰 연동 대기 표시, 디자인 예시이며 실제 연결하지 않음'
+                        : '서버 기기 연동 상태',
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: _plate,
@@ -326,7 +547,13 @@ class KioskDevicePairingScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 24),
                               _text(
-                                '스마트폰 연동 대기 중...',
+                                _backend == null
+                                    ? '스마트폰 연동 대기 중...'
+                                    : _paired
+                                    ? '기기 연동 확인됨'
+                                    : _error != null
+                                    ? '기기 연동을 확인해 주세요'
+                                    : '스마트폰 연동 대기 중...',
                                 24,
                                 color: _gold,
                                 weight: FontWeight.w700,

@@ -8,12 +8,19 @@ class DemoProduct {
     this.image,
     this.categories,
     this.imageX,
-    this.imageY,
-  );
+    this.imageY, {
+    this.id,
+    this.stock,
+    this.company = '',
+    this.itemSeq = '',
+  });
   final String name, badge, priceLabel, image;
   final int price;
   final List<int> categories;
   final double imageX, imageY;
+  final String? id;
+  final int? stock;
+  final String company, itemSeq;
 }
 
 const demoProducts = [

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../demo/demo_cart.dart';
+import '../services/kiosk_backend.dart';
+
 import 'kiosk_menu_screen.dart';
 import 'kiosk_product_list_screen.dart';
 
@@ -8,9 +11,36 @@ import 'kiosk_usage_guide_screen.dart';
 
 /// Screenshot-based linked-user home preview, on a proportionally scaled 1080x1920 canvas.
 class KioskLinkedHomeScreen extends StatelessWidget {
-  const KioskLinkedHomeScreen({super.key, this.onSelect});
+  const KioskLinkedHomeScreen({
+    super.key,
+    this.onSelect,
+    this.onLogout,
+    this.onApprovedMedicines,
+    this.approvedCart,
+    this.memberName = '지*민 님',
+    this.serverPurchaseName,
+  });
 
   final ValueChanged<int>? onSelect;
+  final VoidCallback? onLogout;
+  final VoidCallback? onApprovedMedicines;
+  final DemoCart? approvedCart;
+  final String memberName;
+  final String? serverPurchaseName;
+
+  int get _approvedCount =>
+      approvedCart?.quantities.length ?? (serverPurchaseName != null ? 1 : 2);
+  String get _approvedSummary {
+    if (serverPurchaseName != null) {
+      return '$serverPurchaseName${_approvedCount > 1 ? ' 외 ${_approvedCount - 1}건' : ''} · 승인 약 확인하기';
+    }
+    final cart = approvedCart;
+    if (cart == null) return '타이레놀 외 1건 터치해서 바로 받기';
+    if (cart.quantities.isEmpty) return '승인 약 장바구니를 확인해 주세요.';
+    final first = cart.products[cart.quantities.keys.first].name;
+    return '$first${_approvedCount > 1 ? ' 외 ${_approvedCount - 1}건' : ''} 터치해서 바로 받기';
+  }
+
   static const _background = Color(0xFFFFFDE7);
   static const _brown = Color(0xFF593D0D);
   static const _ink = Color(0xFF0F172A);
@@ -56,7 +86,14 @@ class KioskLinkedHomeScreen extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => approvedCart == null
+      ? _buildScreen(context)
+      : ListenableBuilder(
+          listenable: approvedCart!,
+          builder: (_, _) => _buildScreen(context),
+        );
+
+  Widget _buildScreen(BuildContext context) => Scaffold(
     backgroundColor: _background,
     body: SafeArea(
       child: Center(
@@ -146,7 +183,12 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                               size: 28,
                             ),
                             const SizedBox(width: 12),
-                            _text('지*민 님', 26, FontWeight.w700, color: _brown),
+                            _text(
+                              memberName,
+                              26,
+                              FontWeight.w700,
+                              color: _brown,
+                            ),
                           ],
                         ),
                       ),
@@ -167,10 +209,12 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
                       key: const ValueKey('linked-approved-banner'),
-                      onTap: () => _previewMessage(
-                        context,
-                        '예시 승인 약품 배너입니다. 실제 약사 승인·약품 수령·배출은 연결되지 않았습니다.',
-                      ),
+                      onTap:
+                          onApprovedMedicines ??
+                          () => _previewMessage(
+                            context,
+                            '예시 승인 약품 배너입니다. 실제 약사 승인·약품 수령·배출은 연결되지 않았습니다.',
+                          ),
                       child: Stack(
                         children: [
                           Positioned(
@@ -203,7 +247,9 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                             488,
                             54,
                             _text(
-                              '승인받은 약이 있습니다!',
+                              _approvedCount == 0
+                                  ? '담긴 승인 약이 없어요'
+                                  : '승인받은 약이 있습니다!',
                               44,
                               FontWeight.w800,
                               color: Colors.black,
@@ -215,7 +261,7 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                             470,
                             36,
                             _text(
-                              '타이레놀 외 1건 터치해서 바로 받기',
+                              _approvedSummary,
                               28,
                               FontWeight.w700,
                               color: Colors.black,
@@ -264,7 +310,7 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: _text(
-                          '2',
+                          '$_approvedCount',
                           30,
                           FontWeight.w500,
                           color: Colors.white,
@@ -296,6 +342,10 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                     ),
                     onPressed: () {
+                      if (onLogout != null) {
+                        onLogout!();
+                        return;
+                      }
                       _previewMessage(
                         context,
                         '테스트용 로그아웃: 일반 홈으로 이동합니다. 실제 인증 세션 종료는 연결되지 않았습니다.',
@@ -496,19 +546,32 @@ class KioskLinkedHomeScreen extends StatelessWidget {
                     if (index == 0) {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => const KioskProductListScreen(),
+                          builder: (_) => KioskProductListScreen(
+                            showMember: true,
+                            onLogout: onLogout,
+                          ),
                         ),
                       );
                       return;
                     }
                     if (index == 1) {
+                      if (KioskBackendScope.maybeOf(context) != null) {
+                        _previewMessage(
+                          context,
+                          '승인 약 수량·구매 계약이 준비되지 않아 제한 약품 구매는 진행할 수 없습니다.',
+                        );
+                        return;
+                      }
                       _previewMessage(
                         context,
                         '연동 사용자 구매 흐름 미리보기입니다. 현재 목록은 의약외품 예시이며 제한 약품 판매는 연결되지 않았습니다.',
                       );
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => const KioskProductListScreen(),
+                          builder: (_) => KioskProductListScreen(
+                            showMember: true,
+                            onLogout: onLogout,
+                          ),
                         ),
                       );
                       return;

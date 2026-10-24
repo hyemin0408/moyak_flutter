@@ -6,7 +6,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// Visual prototype from the supplied reference for 86:295.
 /// This screen does not authenticate a user or activate a transaction limit.
 class KioskAuthCompleteScreen extends StatelessWidget {
-  const KioskAuthCompleteScreen({super.key, this.onPreviewContinue});
+  const KioskAuthCompleteScreen({
+    super.key,
+    this.onPreviewContinue,
+    this.deviceLinkOnly = false,
+    this.memberName = '지*민',
+  });
+  final bool deviceLinkOnly;
+  final String memberName;
 
   /// Explicit preview navigation only; does not signal verified authentication.
   final VoidCallback? onPreviewContinue;
@@ -114,14 +121,24 @@ class KioskAuthCompleteScreen extends StatelessWidget {
                   101,
                   230,
                   48,
-                  _text('본인인증 완료', 40, weight: FontWeight.w800),
+                  _text(
+                    deviceLinkOnly ? '기기 연동 완료' : '본인인증 완료',
+                    40,
+                    weight: FontWeight.w800,
+                  ),
                 ),
                 _slot(
                   314,
                   109,
                   390,
                   29,
-                  _text('|  본인인증이 안전하게 완료되었습니다', 24, color: _muted),
+                  _text(
+                    deviceLinkOnly
+                        ? '|  앱과 기기 연결을 확인했습니다'
+                        : '|  본인인증이 안전하게 완료되었습니다',
+                    24,
+                    color: _muted,
+                  ),
                 ),
                 Positioned(
                   left: 906,
@@ -192,14 +209,14 @@ class KioskAuthCompleteScreen extends StatelessWidget {
                   760,
                   64,
                   onPreviewContinue == null
-                      ? _text('지*민님 환영합니다', 48, weight: FontWeight.w900)
+                      ? _text('$memberName님 환영합니다', 48, weight: FontWeight.w900)
                       : Tooltip(
                           message: '테스트용: 연동 사용자 홈 미리보기',
                           child: InkWell(
                             key: const ValueKey('auth-preview-continue'),
                             onTap: onPreviewContinue,
                             child: _text(
-                              '지*민님 환영합니다',
+                              '$memberName님 환영합니다',
                               48,
                               weight: FontWeight.w900,
                             ),
@@ -212,7 +229,13 @@ class KioskAuthCompleteScreen extends StatelessWidget {
                   914,
                   760,
                   40,
-                  _text('본인 연동 및 안전 거래 한도가 활성화되었습니다.', 28, color: _muted),
+                  _text(
+                    deviceLinkOnly
+                        ? '화면을 터치하여 계속하세요. 결제·본인인증 완료를 의미하지 않습니다.'
+                        : '본인 연동 및 안전 거래 한도가 활성화되었습니다.',
+                    28,
+                    color: _muted,
+                  ),
                   alignment: Alignment.center,
                 ),
                 Positioned(

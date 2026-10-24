@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Match the artwork to the 72dp viewport inside the 108dp adaptive layer. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="16.666667%">
+    <bitmap
+        android:src="@drawable/moyak_launcher_art"
+        android:gravity="fill"
+        android:filter="true" />
+</inset>

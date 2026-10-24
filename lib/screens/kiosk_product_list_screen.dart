@@ -4,10 +4,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../demo/demo_products.dart';
 import '../demo/demo_cart.dart';
 import 'kiosk_cart_screen.dart';
+import 'kiosk_payment_screen.dart';
+import '../services/kiosk_backend.dart';
 
 class KioskProductListScreen extends StatefulWidget {
-  const KioskProductListScreen({super.key, this.cart});
+  const KioskProductListScreen({
+    super.key,
+    this.cart,
+    this.showMember = false,
+    this.onLogout,
+  });
   final DemoCart? cart;
+  final bool showMember;
+  final VoidCallback? onLogout;
 
   @override
   State<KioskProductListScreen> createState() => _KioskProductListScreenState();
@@ -30,7 +39,7 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
     '상처/연고',
     '안대/밴드/기타',
   ];
-  static const _products = demoProducts;
+  List<DemoProduct> get _products => _cart.products;
   final _search = TextEditingController();
   // Reproduce Figma's example selection (swab + Medifoam = 7,000 won).
   late final DemoCart _cart;
@@ -40,11 +49,49 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
   @override
   void initState() {
     super.initState();
-    _cart = widget.cart ?? DemoCart();
+  }
+
+  bool _initialized = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+    final backend = KioskBackendScope.maybeOf(context);
+    _cart =
+        widget.cart ?? (backend == null ? DemoCart() : LiveKioskCart(backend));
     _cart.addListener(_refreshCart);
+    if (_cart is LiveKioskCart) {
+      Future.microtask(_loadAndRecover);
+    }
   }
 
   void _refreshCart() => setState(() {});
+
+  bool _recovering = false;
+  Future<void> _loadAndRecover() async {
+    if (!mounted || _cart is! LiveKioskCart || _recovering) return;
+    final live = _cart;
+    await live.load();
+    if (!mounted ||
+        live.order == null ||
+        live.uncertain ||
+        live.backend.orderError != null) {
+      return;
+    }
+    _recovering = true;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => KioskPaymentScreen(
+          cart: live,
+          showMember: widget.showMember,
+          onLogout: widget.onLogout,
+        ),
+      ),
+    );
+    _recovering = false;
+    if (mounted && live.order == null && !live.uncertain) await live.load();
+  }
 
   void _openCart() {
     FocusScope.of(context).unfocus();
@@ -53,6 +100,13 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
       MaterialPageRoute<void>(
         builder: (cartContext) => KioskCartScreen(
           cart: _cart,
+          showMember: widget.showMember,
+          onLogout: widget.onLogout == null
+              ? null
+              : () {
+                  _cart.clear();
+                  widget.onLogout!();
+                },
           onAddProducts: () => Navigator.of(cartContext).pop(),
         ),
       ),
@@ -348,21 +402,33 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
                     top: 581,
                     width: 952,
                     height: 836,
-                    child: visible.isEmpty
+                    child:
+                        _cart is LiveKioskCart &&
+                            ((_cart).busy || (_cart).error != null)
+                        ? Center(
+                            child: Text(
+                              (_cart).busy
+                                  ? '상품 정보를 불러오는 중입니다…'
+                                  : (_cart).error!,
+                              style: _style(26),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : visible.isEmpty
                         ? Center(
                             child: _text('검색 결과가 없습니다.', 26, color: _muted),
                           )
-                        : Stack(
-                            children: [
-                              for (var slot = 0; slot < visible.length; slot++)
-                                Positioned(
-                                  left: (slot % 3) * (952 / 3 + 8),
-                                  top: (slot ~/ 3) * 430,
-                                  width: (952 - 48) / 3,
-                                  height: 406,
-                                  child: _card(visible[slot]),
+                        : GridView.builder(
+                            padding: EdgeInsets.zero,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 24,
+                                  crossAxisSpacing: 24,
+                                  mainAxisExtent: 406,
                                 ),
-                            ],
+                            itemCount: visible.length,
+                            itemBuilder: (_, slot) => _card(visible[slot]),
                           ),
                   ),
                   _summary(),
@@ -450,11 +516,12 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
 
   Widget _card(int index) {
     final product = _products[index];
-    Widget image = Image.asset(
-      'assets/products/${product.image}',
-      fit: BoxFit.cover,
-    );
-    if (index == 5) {
+    Widget image = product.image.isEmpty
+        ? const Center(
+            child: Icon(Icons.medication_outlined, size: 70, color: _gold),
+          )
+        : Image.asset('assets/products/${product.image}', fit: BoxFit.cover);
+    if (product.image == 'pad.png') {
       image = Stack(
         clipBehavior: Clip.hardEdge,
         children: [
@@ -479,7 +546,11 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           key: ValueKey('product-card-$index'),
-          onTap: () => _message('예시 제품 선택: ${product.name}'),
+          onTap: () => _message(
+            _cart is LiveKioskCart
+                ? '${product.name}\n${product.company} · 품목코드 ${product.itemSeq}\n단가 ${product.priceLabel} · 재고 ${product.stock}개\n효능·용법 등 상세 정보 API는 아직 제공되지 않습니다.'
+                : '예시 제품 선택: ${product.name}',
+          ),
           child: Stack(
             children: [
               Positioned(
@@ -523,10 +594,26 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
                 top: 336,
                 width: 66,
                 height: 46,
-                child: _button('add-product-$index', () {
-                  _cart.add(index);
-                  _message('예시 제품 담기: ${product.name}');
-                }, _text('담기', 18, weight: FontWeight.w700, color: _brown)),
+                child: _button(
+                  'add-product-$index',
+                  () {
+                    try {
+                      _cart.add(index);
+                    } on ArgumentError {
+                      _message('현재 재고 수량을 초과할 수 없습니다.');
+                      return;
+                    }
+                    _message(
+                      '${_cart is LiveKioskCart ? '제품' : '예시 제품'} 담기: ${product.name}',
+                    );
+                  },
+                  _text(
+                    product.stock == 0 ? '품절' : '담기',
+                    18,
+                    weight: FontWeight.w700,
+                    color: _brown,
+                  ),
+                ),
               ),
             ],
           ),

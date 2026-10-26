@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/moyak_api_models.dart';
+import '../models/kiosk_machine.dart';
 import 'service_result.dart';
 
 /// Confirmed deployment from the repository README. Overridable at build time.
@@ -145,6 +146,20 @@ class MoyakApiClient {
     }
     return true;
   });
+
+  /// Read-only location directory. Does not prove registration in the order DB.
+  Future<ServiceResult<List<KioskMachine>>> kioskMachines() =>
+      _request('GET', '/api/v1/map/machines', (value) {
+        final json = apiObject(value);
+        if (json['truncated'] != false) {
+          throw const FormatException('Incomplete machine directory');
+        }
+        final items = apiList(json['items'], KioskMachine.fromJson);
+        if (items.map((m) => m.code).toSet().length != items.length) {
+          throw const FormatException('Duplicate machine code');
+        }
+        return items;
+      });
   Future<ServiceResult<List<KioskProduct>>> kioskProducts(String machineId) =>
       _request(
         'GET',

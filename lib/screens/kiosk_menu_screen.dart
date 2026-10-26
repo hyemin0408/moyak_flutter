@@ -1,3 +1,5 @@
+import '../widgets/kiosk_viewport.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -29,7 +31,7 @@ class KioskMenuScreen extends StatelessWidget {
     style: TextStyle(
       fontFamily: 'MenuInter',
       fontFamilyFallback: const ['MenuKorean'],
-      fontSize: size,
+      fontSize: kioskFontSize(size),
       fontWeight: weight,
       color: color,
       height: height,
@@ -58,136 +60,129 @@ class KioskMenuScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: _background,
     body: SafeArea(
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-            width: 1080,
-            height: 1920,
-            child: Stack(
-              children: [
-                const Positioned.fill(child: ColoredBox(color: _background)),
-                const Positioned(
-                  left: 0,
-                  top: 0,
-                  width: 1080,
-                  height: 204,
-                  child: ColoredBox(color: Colors.white),
-                ),
-                Positioned(
-                  left: 64,
-                  top: 59,
-                  width: 91,
-                  height: 30,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: _yellow,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                ),
-                _slot(
-                  74,
-                  63,
-                  71,
-                  22,
-                  _text('모두의 약', 18, FontWeight.w800, color: _brown),
-                ),
-                _slot(167, 57, 52, 34, _text('모약', 28, FontWeight.w800)),
-                _slot(64, 99, 148, 48, _text('시작하기', 40, FontWeight.w800)),
-                _slot(
-                  228,
-                  108.5,
-                  378,
-                  29,
-                  _text(
-                    '|  원하시는 구매 방법을 선택해 주세요',
-                    24,
-                    FontWeight.w500,
-                    color: _muted,
-                  ),
-                ),
-                _slot(
-                  953,
-                  89,
-                  61,
-                  27,
-                  _text('한국어', 22, FontWeight.w600, color: _muted),
-                ),
-                Positioned(
-                  left: 1026,
-                  top: 89,
-                  width: 16,
-                  height: 16,
-                  child: SvgPicture.asset('assets/menu/chevron.svg'),
-                ),
-                _slot(
-                  188,
-                  285,
-                  704,
-                  68,
-                  _text('언제나 안심하는 비상약 자판기', 56, FontWeight.w900, color: _brown),
-                ),
-                _slot(
-                  207,
-                  374,
-                  664,
-                  29,
-                  _text(
-                    '365일 24시간 스마트 비상 의약품 자판기 서비스 모두의 약입니다.',
-                    24,
-                    FontWeight.w500,
-                    color: _muted,
-                  ),
-                ),
-                _card(
-                  context,
-                  0,
-                  485,
-                  '의약외품 즉시 구매',
-                  '밴드, 거즈, 마스크 등 의약외품을 본인인증 없이 간편하게 구매할 수 있습니다.',
-                  'pill_bottle.svg',
-                  titleWidth: 249,
-                  badge: '인증 불필요',
-                  badgeWidth: 102,
-                  badgeColor: const Color(0xFF10B981),
-                ),
-                _card(
-                  context,
-                  1,
-                  710,
-                  '본인인증 필요 약품 구매',
-                  '모바일 앱 연동 및 간편 본인인증이 필요한 성인 의약품 및 제한 약품 구매',
-                  'shield_user.svg',
-                  titleWidth: 314,
-                  badge: '본인인증',
-                  badgeWidth: 83,
-                  badgeColor: const Color(0xFFEF4444),
-                ),
-                _card(
-                  context,
-                  2,
-                  935,
-                  '앱 다운로드 및 사용 방법',
-                  '모약 앱을 다운로드하고 다양한 서비스를 이용해 보세요.',
-                  'app_icon.svg',
-                  titleWidth: 320,
-                ),
-                Positioned(
-                  left: 0,
-                  top: 1758,
-                  width: 1080,
-                  height: 162,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(top: BorderSide(color: Color(0xFFFFF3C4))),
-                    ),
-                  ),
-                ),
-              ],
+      child: KioskViewport(
+        child: KioskCanvas(
+          children: [
+            const Positioned.fill(child: ColoredBox(color: _background)),
+            const Positioned(
+              left: 0,
+              top: 0,
+              width: 1080,
+              height: 204,
+              child: ColoredBox(color: Colors.white),
             ),
-          ),
+            Positioned(
+              left: 64,
+              top: 59,
+              width: 91,
+              height: 30,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _yellow,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+            _slot(
+              74,
+              63,
+              71,
+              22,
+              _text('모두의 약', 18, FontWeight.w800, color: _brown),
+            ),
+            _slot(167, 57, 52, 34, _text('모약', 28, FontWeight.w800)),
+            _slot(64, 99, 148, 48, _text('시작하기', 40, FontWeight.w800)),
+            _slot(
+              228,
+              108.5,
+              378,
+              29,
+              _text(
+                '|  원하시는 구매 방법을 선택해 주세요',
+                24,
+                FontWeight.w500,
+                color: _muted,
+              ),
+            ),
+            _slot(
+              953,
+              89,
+              61,
+              27,
+              _text('한국어', 22, FontWeight.w600, color: _muted),
+            ),
+            Positioned(
+              left: 1026,
+              top: 89,
+              width: 16,
+              height: 16,
+              child: SvgPicture.asset('assets/menu/chevron.svg'),
+            ),
+            _slot(
+              188,
+              430,
+              704,
+              68,
+              _text('언제나 안심하는 비상약 자판기', 56, FontWeight.w900, color: _brown),
+            ),
+            _slot(
+              207,
+              532,
+              664,
+              29,
+              _text(
+                '365일 24시간 스마트 비상 의약품 자판기 서비스 모두의 약입니다.',
+                24,
+                FontWeight.w500,
+                color: _muted,
+              ),
+            ),
+            _card(
+              context,
+              0,
+              660,
+              '의약외품 즉시 구매',
+              '밴드, 거즈, 마스크 등 의약외품을 본인인증 없이 간편하게 구매할 수 있습니다.',
+              'pill_bottle.svg',
+              titleWidth: 300,
+              badge: '인증 불필요',
+              badgeWidth: 102,
+              badgeColor: const Color(0xFF10B981),
+            ),
+            _card(
+              context,
+              1,
+              930,
+              '본인인증 필요 약품 구매',
+              '모바일 앱 연동 및 간편 본인인증이 필요한 성인 의약품 및 제한 약품 구매',
+              'shield_user.svg',
+              titleWidth: 390,
+              badge: '본인인증',
+              badgeWidth: 83,
+              badgeColor: const Color(0xFFEF4444),
+            ),
+            _card(
+              context,
+              2,
+              1200,
+              '앱 다운로드 및 사용 방법',
+              '모약 앱을 다운로드하고 다양한 서비스를 이용해 보세요.',
+              'app_icon.svg',
+              titleWidth: 540,
+            ),
+            Positioned(
+              left: 0,
+              top: 1758,
+              width: 1080,
+              height: 162,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: Color(0xFFFFF3C4))),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ),
@@ -208,7 +203,7 @@ class KioskMenuScreen extends StatelessWidget {
     left: 64,
     top: top,
     width: 952,
-    height: 176,
+    height: 224,
     child: DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -225,7 +220,7 @@ class KioskMenuScreen extends StatelessWidget {
         children: [
           Positioned(
             left: 40,
-            top: 40,
+            top: 64,
             width: 96,
             height: 96,
             child: icon == 'app_icon.svg'
@@ -241,7 +236,7 @@ class KioskMenuScreen extends StatelessWidget {
                     ),
                   ),
           ),
-          _slot(168, 46.5, titleWidth, 39, _text(title, 32, FontWeight.w900)),
+          _slot(168, 40, titleWidth, 46, _text(title, 36, FontWeight.w900)),
           if (badge != null)
             Positioned(
               left: 168 + titleWidth + 16,
@@ -258,18 +253,30 @@ class KioskMenuScreen extends StatelessWidget {
                 ),
               ),
             ),
-          _slot(
-            168,
-            97.5,
-            680,
-            32,
-            _text(description, 21, FontWeight.w500, color: _muted, height: 1.5),
+          Positioned(
+            left: 168,
+            top: 102,
+            width: 640,
+            height: 88,
+            child: Text(
+              description.replaceFirst(' 다양한', '\n다양한'),
+              semanticsLabel: description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'MenuInter',
+                fontFamilyFallback: ['MenuKorean'],
+                fontSize: 28,
+                height: 1.45,
+                color: _muted,
+              ),
+            ),
           ),
           Positioned(
-            left: 848,
-            top: 56,
-            width: 64,
-            height: 64,
+            left: 824,
+            top: 68,
+            width: 88,
+            height: 88,
             child: DecoratedBox(
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,

@@ -1,3 +1,5 @@
+import '../widgets/kiosk_viewport.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -31,7 +33,7 @@ class KioskUsageGuideScreen extends StatelessWidget {
     style: TextStyle(
       fontFamily: 'MenuInter',
       fontFamilyFallback: const ['MenuKorean'],
-      fontSize: size,
+      fontSize: kioskFontSize(size),
       fontWeight: weight,
       color: color,
       height: 1.2,
@@ -57,173 +59,159 @@ class KioskUsageGuideScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: _background,
     body: SafeArea(
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-            width: 1080,
-            height: 1920,
-            child: Stack(
-              children: [
-                const Positioned.fill(child: ColoredBox(color: _background)),
-                const Positioned(
-                  left: 0,
-                  top: 0,
-                  width: 1080,
-                  height: 204,
-                  child: ColoredBox(color: Colors.white),
+      child: KioskViewport(
+        child: KioskCanvas(
+          children: [
+            const Positioned.fill(child: ColoredBox(color: _background)),
+            const Positioned(
+              left: 0,
+              top: 0,
+              width: 1080,
+              height: 204,
+              child: ColoredBox(color: Colors.white),
+            ),
+            Positioned(
+              left: 64,
+              top: 59,
+              width: 91,
+              height: 30,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _yellow,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                Positioned(
-                  left: 64,
-                  top: 59,
-                  width: 91,
-                  height: 30,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: _yellow,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
+              ),
+            ),
+            _slot(
+              74,
+              63,
+              71,
+              22,
+              _text('모두의 약', 18, color: _brown, weight: FontWeight.w800),
+            ),
+            _slot(167, 57, 52, 34, _text('모약', 28, weight: FontWeight.w800)),
+            _slot(
+              64,
+              101,
+              402,
+              48,
+              _text('앱 다운로드 및 사용 방법', 40, weight: FontWeight.w800),
+            ),
+            _slot(
+              484,
+              111,
+              376,
+              29,
+              _text('|  원하시는 구매 방법을 선택해 주세요', 24, color: _muted),
+            ),
+            Positioned(
+              left: 922,
+              top: 81,
+              width: 133,
+              height: 51,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: _border),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                _slot(
-                  74,
-                  63,
-                  71,
-                  22,
-                  _text('모두의 약', 18, color: _brown, weight: FontWeight.w800),
-                ),
-                _slot(
-                  167,
-                  57,
-                  52,
-                  34,
-                  _text('모약', 28, weight: FontWeight.w800),
-                ),
-                _slot(
-                  64,
-                  101,
-                  402,
-                  48,
-                  _text('앱 다운로드 및 사용 방법', 40, weight: FontWeight.w800),
-                ),
-                _slot(
-                  484,
-                  111,
-                  376,
-                  29,
-                  _text('|  원하시는 구매 방법을 선택해 주세요', 24, color: _muted),
-                ),
-                Positioned(
-                  left: 922,
-                  top: 81,
-                  width: 133,
-                  height: 51,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: _border),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _text(
-                              '한국어',
-                              22,
-                              color: _muted,
-                              weight: FontWeight.w600,
-                            ),
-                            const SizedBox(width: 12),
-                            SvgPicture.asset(
-                              'assets/menu/chevron.svg',
-                              width: 16,
-                              height: 16,
-                            ),
-                          ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _text(
+                          '한국어',
+                          22,
+                          color: _muted,
+                          weight: FontWeight.w600,
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                _slot(
-                  140,
-                  282,
-                  800,
-                  72,
-                  _text('사용 방법', 56, color: _brown, weight: FontWeight.w900),
-                  alignment: Alignment.center,
-                ),
-                _slot(
-                  140,
-                  374,
-                  800,
-                  36,
-                  _text('모약 키오스크에서 간편하게 약품을 구매해 보세요.', 26, color: _muted),
-                  alignment: Alignment.center,
-                ),
-                for (var index = 0; index < _steps.length; index++)
-                  _step(index),
-                Positioned(
-                  left: 0,
-                  top: 1758,
-                  width: 1080,
-                  height: 162,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(top: BorderSide(color: _border)),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 64,
-                  top: 1798,
-                  width: 224,
-                  height: 82,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x33000000),
-                          offset: Offset(0, 4),
-                          blurRadius: 4,
+                        const SizedBox(width: 12),
+                        SvgPicture.asset(
+                          'assets/menu/chevron.svg',
+                          width: 16,
+                          height: 16,
                         ),
                       ],
                     ),
-                    child: Material(
-                      color: _plate,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(color: _border, width: 2),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        key: const ValueKey('usage-back'),
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/products/back.svg',
-                              width: 24,
-                              height: 24,
-                            ),
-                            const SizedBox(width: 16),
-                            _text('이전으로', 28, weight: FontWeight.w700),
-                          ],
+                  ),
+                ),
+              ),
+            ),
+            _slot(
+              140,
+              282,
+              800,
+              72,
+              _text('사용 방법', 56, color: _brown, weight: FontWeight.w900),
+              alignment: Alignment.center,
+            ),
+            _slot(
+              140,
+              374,
+              800,
+              36,
+              _text('모약 키오스크에서 간편하게 약품을 구매해 보세요.', 26, color: _muted),
+              alignment: Alignment.center,
+            ),
+            for (var index = 0; index < _steps.length; index++) _step(index),
+            Positioned(
+              left: 0,
+              top: 1758,
+              width: 1080,
+              height: 162,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: _border)),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 64,
+              top: 1798,
+              width: 224,
+              height: 82,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      offset: Offset(0, 4),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: _plate,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: _border, width: 2),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    key: const ValueKey('usage-back'),
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/products/back.svg',
+                          width: 24,
+                          height: 24,
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        _text('이전으로', 28, weight: FontWeight.w700),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     ),
@@ -278,7 +266,23 @@ class KioskUsageGuideScreen extends StatelessWidget {
             39,
             _text(_steps[index].$1, 32, weight: FontWeight.w900),
           ),
-          _slot(144, 98, 768, 32, _text(_steps[index].$2, 21, color: _muted)),
+          Positioned(
+            left: 144,
+            top: 96,
+            width: 768,
+            height: 64,
+            child: Text(
+              _steps[index].$2,
+              maxLines: 2,
+              style: TextStyle(
+                fontFamily: 'MenuInter',
+                fontFamilyFallback: const ['MenuKorean'],
+                fontSize: 26,
+                height: 1.4,
+                color: _muted,
+              ),
+            ),
+          ),
         ],
       ),
     ),

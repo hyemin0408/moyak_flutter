@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../demo/demo_cart.dart';
 import '../demo/demo_products.dart';
 import '../models/moyak_api_models.dart';
+import '../models/product_image_catalog.dart';
 import 'moyak_api_client.dart';
 import 'service_result.dart';
 import 'order_recovery_store.dart';
@@ -26,6 +27,39 @@ class KioskBackend {
   final MoyakApiClient api;
   final String machineId, environment;
   final bool allowMutations;
+  final Set<DemoCart> _activeCarts = {};
+
+  /// Local checks only: changing installation must not expire/cancel server orders.
+  Future<String?> machineChangeError({String? targetMachineId}) async {
+    if (orderBusy ||
+        _qrBusy ||
+        _sessionRead != null ||
+        _activeCarts.any(
+          (c) =>
+              c.productQuantities.isNotEmpty || (c is LiveKioskCart && c.busy),
+        )) {
+      return '장바구니 또는 처리 중인 요청이 있습니다. 먼저 구매 흐름을 정리해 주세요.';
+    }
+    if (session?.paired == true || approvedPurchases.isNotEmpty) {
+      return '연동된 회원이 있습니다. 먼저 로그아웃해 주세요.';
+    }
+    if (pendingOrder != null || recoveryOrderId != null || orderUncertain) {
+      return '진행 중이거나 확인이 필요한 주문이 있습니다. 주문 확인 후 기기를 변경해 주세요.';
+    }
+    try {
+      for (final code in {machineId, ?targetMachineId}) {
+        final key = jsonEncode([api.recoveryNamespace, environment, code]);
+        final record = await recoveryStore.read(key);
+        if (record?.orderId != null || record?.uncertain == true) {
+          return '선택한 기기 또는 현재 기기에 주문 복구 기록이 있습니다. 주문을 확인해 주세요.';
+        }
+      }
+    } catch (_) {
+      return '주문 복구 기록을 확인하지 못해 기기를 변경할 수 없습니다.';
+    }
+    return null;
+  }
+
   // Application-wide guard survives leaving a screen after an ambiguous POST.
   bool orderUncertain = false;
   KioskOrder? pendingOrder;
@@ -397,9 +431,11 @@ class KioskBackendScope extends InheritedWidget {
   const KioskBackendScope({
     super.key,
     required this.backend,
+    this.onMachineSetup,
     required super.child,
   });
   final KioskBackend backend;
+  final Future<void> Function(BuildContext)? onMachineSetup;
   static KioskBackend? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<KioskBackendScope>()?.backend;
   @override
@@ -423,8 +459,7 @@ class LiveApprovedKioskCart extends DemoCart {
               '약사 승인',
               p.price ?? 0,
               p.price == null ? '가격 확인 필요' : '${p.price}원',
-              demoProducts.where((d) => d.name == p.name).firstOrNull?.image ??
-                  '',
+              productImageAsset(itemSeq: p.itemSeq, name: p.name),
               const [],
               0,
               0,
@@ -437,10 +472,18 @@ class LiveApprovedKioskCart extends DemoCart {
         approvedLimits: {
           for (var i = 0; i < values.length; i++) i: values[i].quantity,
         },
-      );
+      ) {
+    backend._activeCarts.add(this);
+  }
   final KioskBackend backend;
   final String userId;
   final List<KioskApprovedPurchase> approvals;
+  @override
+  void dispose() {
+    backend._activeCarts.remove(this);
+    super.dispose();
+  }
+
   @override
   int get totalWon =>
       quantities.keys.fold(0, (sum, i) => sum + (approvals[i].price ?? 0));
@@ -501,7 +544,10 @@ class LiveApprovedKioskCart extends DemoCart {
 }
 
 class LiveKioskCart extends DemoCart {
-  LiveKioskCart(this.backend) : super(products: const [], quantities: const {});
+  LiveKioskCart(this.backend)
+    : super(products: const [], quantities: const {}) {
+    backend._activeCarts.add(this);
+  }
   final KioskBackend backend;
   KioskOrder? get order => backend.pendingOrder;
   set order(KioskOrder? value) => backend.pendingOrder = value;
@@ -513,6 +559,7 @@ class LiveKioskCart extends DemoCart {
   @override
   void dispose() {
     _disposed = true;
+    backend._activeCarts.remove(this);
     super.dispose();
   }
 
@@ -627,7 +674,7 @@ class LiveKioskCart extends DemoCart {
       p.badge,
       p.price,
       '${p.price.toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}원',
-      known?.image ?? '',
+      productImageAsset(itemSeq: p.itemSeq, name: p.name),
       [if (categories.indexOf(p.category) > 0) categories.indexOf(p.category)],
       known?.imageX ?? 45,
       known?.imageY ?? 12,

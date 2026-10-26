@@ -1,3 +1,5 @@
+import '../widgets/kiosk_viewport.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -128,7 +130,7 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
   }) => TextStyle(
     fontFamily: 'MenuInter',
     fontFamilyFallback: const ['MenuKorean'],
-    fontSize: size,
+    fontSize: kioskFontSize(size),
     fontWeight: weight,
     color: color,
     height: 1.2,
@@ -201,277 +203,253 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
     return Scaffold(
       backgroundColor: _background,
       body: SafeArea(
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: 1080,
-              height: 1920,
-              child: Stack(
-                children: [
-                  const Positioned.fill(child: ColoredBox(color: _background)),
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    width: 1080,
-                    height: 204,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(bottom: BorderSide(color: _border)),
-                      ),
-                    ),
+        child: KioskViewport(
+          child: KioskCanvas(
+            children: [
+              const Positioned.fill(child: ColoredBox(color: _background)),
+              Positioned(
+                left: 0,
+                top: 0,
+                width: 1080,
+                height: 204,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(bottom: BorderSide(color: _border)),
                   ),
-                  Positioned(
-                    left: 55,
-                    top: 57,
-                    width: 91,
-                    height: 30,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: _yellow,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                  ),
-                  _slot(
-                    65,
-                    61,
-                    71,
-                    22,
-                    _text('모두의 약', 18, weight: FontWeight.w800, color: _brown),
-                  ),
-                  _slot(
-                    158,
-                    55,
-                    52,
-                    34,
-                    _text('모약', 28, weight: FontWeight.w800),
-                  ),
-                  _slot(
-                    55,
-                    95,
-                    230,
-                    48,
-                    _text('의약외품 목록', 40, weight: FontWeight.w800),
-                  ),
-                  _slot(
-                    338,
-                    104.5,
-                    365,
-                    29,
-                    _text(
-                      '|  처방전 없이 즉시 구매 가능한 약품',
-                      24,
-                      weight: FontWeight.w400,
-                      color: _muted,
-                    ),
-                  ),
-                  Positioned(
-                    left: 917,
-                    top: 79,
-                    width: 133,
-                    height: 51,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: _border),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  _slot(
-                    941,
-                    91,
-                    61,
-                    27,
-                    _text('한국어', 22, weight: FontWeight.w600, color: _muted),
-                  ),
-                  Positioned(
-                    left: 1010,
-                    top: 96.5,
-                    width: 16,
-                    height: 16,
-                    child: SvgPicture.asset('assets/menu/chevron.svg'),
-                  ),
-                  Positioned(
-                    left: 64,
-                    top: 346,
-                    width: 952,
-                    height: 80,
-                    child: DecoratedBox(
-                      decoration: _decoration(
-                        color: Colors.white,
-                        opacity: 0.1,
-                        blur: 4,
-                        dy: 4,
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 24),
-                          SvgPicture.asset(
-                            'assets/products/search.svg',
-                            width: 32,
-                            height: 32,
-                          ),
-                          const SizedBox(width: 24),
-                          Expanded(
-                            child: TextField(
-                              key: const ValueKey('product-search'),
-                              controller: _search,
-                              onChanged: (_) => setState(() {}),
-                              style: _style(26),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '필요한 제품을 검색해 보세요 (예: 밴드, 거즈, 마스크)',
-                                hintStyle: _style(
-                                  26,
-                                  weight: FontWeight.w400,
-                                  color: const Color(0xFF94A3B8),
-                                ),
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 24),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 64,
-                    top: 482,
-                    width: 952,
-                    height: 67,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (
-                            var index = 0;
-                            index < _tabs.length;
-                            index++
-                          ) ...[
-                            if (index > 0) const SizedBox(width: 16),
-                            SizedBox(
-                              width: [
-                                97.0,
-                                166.0,
-                                166.0,
-                                187.0,
-                                146.0,
-                                195.0,
-                              ][index],
-                              height: 67,
-                              child: Material(
-                                color: _category == index ? _yellow : _plate,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: _category == index
-                                        ? _yellow
-                                        : _border,
-                                  ),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: InkWell(
-                                  key: ValueKey('product-category-$index'),
-                                  onTap: () =>
-                                      setState(() => _category = index),
-                                  child: Semantics(
-                                    selected: _category == index,
-                                    button: true,
-                                    child: Center(
-                                      child: _text(
-                                        _tabs[index],
-                                        22,
-                                        weight: FontWeight.w700,
-                                        color: _muted,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 64,
-                    top: 581,
-                    width: 952,
-                    height: 836,
-                    child:
-                        _cart is LiveKioskCart &&
-                            ((_cart).busy || (_cart).error != null)
-                        ? Center(
-                            child: Text(
-                              (_cart).busy
-                                  ? '상품 정보를 불러오는 중입니다…'
-                                  : (_cart).error!,
-                              style: _style(26),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        : visible.isEmpty
-                        ? Center(
-                            child: _text('검색 결과가 없습니다.', 26, color: _muted),
-                          )
-                        : GridView.builder(
-                            padding: EdgeInsets.zero,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  mainAxisSpacing: 24,
-                                  crossAxisSpacing: 24,
-                                  mainAxisExtent: 406,
-                                ),
-                            itemCount: visible.length,
-                            itemBuilder: (_, slot) => _card(visible[slot]),
-                          ),
-                  ),
-                  _summary(),
-                  Positioned(
-                    left: 0,
-                    top: 1758,
-                    width: 1080,
-                    height: 162,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(top: BorderSide(color: _border)),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 64,
-                    top: 1798,
-                    width: 224,
-                    height: 82,
-                    child: _button(
-                      'previous-screen',
-                      () => Navigator.of(context).pop(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/products/back.svg',
-                            width: 24,
-                            height: 24,
-                          ),
-                          const SizedBox(width: 16),
-                          _text('이전으로', 28, weight: FontWeight.w700),
-                        ],
-                      ),
-                      color: _plate,
-                      radius: 16,
-                      border: true,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              Positioned(
+                left: 55,
+                top: 57,
+                width: 91,
+                height: 30,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _yellow,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+              _slot(
+                65,
+                61,
+                71,
+                22,
+                _text('모두의 약', 18, weight: FontWeight.w800, color: _brown),
+              ),
+              _slot(158, 55, 52, 34, _text('모약', 28, weight: FontWeight.w800)),
+              _slot(
+                55,
+                95,
+                230,
+                48,
+                _text('의약외품 목록', 40, weight: FontWeight.w800),
+              ),
+              _slot(
+                338,
+                104.5,
+                365,
+                29,
+                _text(
+                  '|  처방전 없이 즉시 구매 가능한 약품',
+                  24,
+                  weight: FontWeight.w400,
+                  color: _muted,
+                ),
+              ),
+              Positioned(
+                left: 917,
+                top: 79,
+                width: 133,
+                height: 51,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: _border),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              _slot(
+                941,
+                91,
+                61,
+                27,
+                _text('한국어', 22, weight: FontWeight.w600, color: _muted),
+              ),
+              Positioned(
+                left: 1010,
+                top: 96.5,
+                width: 16,
+                height: 16,
+                child: SvgPicture.asset('assets/menu/chevron.svg'),
+              ),
+              Positioned(
+                left: 64,
+                top: 346,
+                width: 952,
+                height: 80,
+                child: DecoratedBox(
+                  decoration: _decoration(
+                    color: Colors.white,
+                    opacity: 0.1,
+                    blur: 4,
+                    dy: 4,
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 24),
+                      SvgPicture.asset(
+                        'assets/products/search.svg',
+                        width: 32,
+                        height: 32,
+                      ),
+                      const SizedBox(width: 24),
+                      Expanded(
+                        child: TextField(
+                          key: const ValueKey('product-search'),
+                          controller: _search,
+                          onChanged: (_) => setState(() {}),
+                          style: _style(26),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '필요한 제품을 검색해 보세요 (예: 밴드, 거즈, 마스크)',
+                            hintStyle: _style(
+                              26,
+                              weight: FontWeight.w400,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 64,
+                top: 482,
+                width: 952,
+                height: 67,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (var index = 0; index < _tabs.length; index++) ...[
+                        if (index > 0) const SizedBox(width: 16),
+                        SizedBox(
+                          width: [
+                            97.0,
+                            166.0,
+                            166.0,
+                            187.0,
+                            146.0,
+                            195.0,
+                          ][index],
+                          height: 67,
+                          child: Material(
+                            color: _category == index ? _yellow : _plate,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: _category == index ? _yellow : _border,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              key: ValueKey('product-category-$index'),
+                              onTap: () => setState(() => _category = index),
+                              child: Semantics(
+                                selected: _category == index,
+                                button: true,
+                                child: Center(
+                                  child: _text(
+                                    _tabs[index],
+                                    22,
+                                    weight: FontWeight.w700,
+                                    color: _muted,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 64,
+                top: 581,
+                width: 952,
+                height: 836,
+                child:
+                    _cart is LiveKioskCart &&
+                        ((_cart).busy || (_cart).error != null)
+                    ? Center(
+                        child: Text(
+                          (_cart).busy ? '상품 정보를 불러오는 중입니다…' : (_cart).error!,
+                          style: _style(26),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : visible.isEmpty
+                    ? Center(child: _text('검색 결과가 없습니다.', 26, color: _muted))
+                    : GridView.builder(
+                        padding: EdgeInsets.zero,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 24,
+                              crossAxisSpacing: 24,
+                              mainAxisExtent: 500,
+                            ),
+                        itemCount: visible.length,
+                        itemBuilder: (_, slot) => _card(visible[slot]),
+                      ),
+              ),
+              _summary(),
+              Positioned(
+                left: 0,
+                top: 1758,
+                width: 1080,
+                height: 162,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(top: BorderSide(color: _border)),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 64,
+                top: 1798,
+                width: 224,
+                height: 82,
+                child: _button(
+                  'previous-screen',
+                  () => Navigator.of(context).pop(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/products/back.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                      const SizedBox(width: 16),
+                      _text('이전으로', 28, weight: FontWeight.w700),
+                    ],
+                  ),
+                  color: _plate,
+                  radius: 16,
+                  border: true,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -516,28 +494,7 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
 
   Widget _card(int index) {
     final product = _products[index];
-    Widget image = product.image.isEmpty
-        ? const Center(
-            child: Icon(Icons.medication_outlined, size: 70, color: _gold),
-          )
-        : Image.asset('assets/products/${product.image}', fit: BoxFit.cover);
-    if (product.image == 'pad.png') {
-      image = Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          Positioned(
-            left: -211 * 0.0837,
-            top: 0,
-            width: 211 * 1.1693,
-            height: 232 * 1.0634,
-            child: Image.asset(
-              'assets/products/${product.image}',
-              fit: BoxFit.fill,
-            ),
-          ),
-        ],
-      );
-    }
+    const image = Icon(Icons.medication_outlined, size: 88, color: _gold);
     return DecoratedBox(
       decoration: _decoration(),
       child: Material(
@@ -554,10 +511,10 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
           child: Stack(
             children: [
               Positioned(
-                left: product.imageX,
-                top: product.imageY,
+                left: 45,
+                top: 12,
                 width: 211,
-                height: 232,
+                height: 204,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: image,
@@ -565,35 +522,40 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
               ),
               _slot(
                 36,
-                250,
-                150,
-                19,
+                228,
+                230,
+                28,
                 _text(product.badge, 16, weight: FontWeight.w700, color: _gold),
               ),
-              _slot(
-                24,
-                291,
-                253.333,
-                29,
-                _text(product.name, 24, weight: FontWeight.w800),
+              Positioned(
+                left: 24,
+                top: 270,
+                width: 253.333,
+                height: 116,
+                child: Text(
+                  product.name,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: _style(30, weight: FontWeight.w800),
+                ),
               ),
               _slot(
                 24,
-                342,
+                410,
                 150,
-                34,
+                42,
                 _text(
                   product.priceLabel,
-                  28,
+                  34,
                   weight: FontWeight.w800,
                   color: _gold,
                 ),
               ),
               Positioned(
-                left: 211.333,
-                top: 336,
-                width: 66,
-                height: 46,
+                left: 184,
+                top: 398,
+                width: 104,
+                height: 78,
                 child: _button(
                   'add-product-$index',
                   () {
@@ -609,7 +571,7 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
                   },
                   _text(
                     product.stock == 0 ? '품절' : '담기',
-                    18,
+                    26,
                     weight: FontWeight.w700,
                     color: _brown,
                   ),

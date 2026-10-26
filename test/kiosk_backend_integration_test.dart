@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -397,15 +398,62 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const KioskApplication());
-      await tester.tap(find.byType(InkWell));
+      const channel = MethodChannel('moyak/order_recovery');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (call) async => call.method == 'read' ? null : true,
+          );
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+      final paths = <String>[];
+      final api = MoyakApiClient(
+        client: MockClient((request) async {
+          paths.add(request.url.path);
+          return http.Response(
+            jsonEncode({
+              'truncated': false,
+              'items': [
+                {'code': 'VM-001', 'name': '등록된 테스트 위치', 'address': '테스트 주소'},
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          );
+        }),
+      );
+      await tester.pumpWidget(KioskApplication(api: api));
+      await tester.pumpAndSettle();
+      expect(find.text('모약 · 설치 기기 설정'), findsOneWidget);
+      expect(find.byType(KioskStartScreen), findsNothing);
+      await tester.tap(find.text('등록된 테스트 위치'));
+      await tester.pump();
+      await tester.tap(find.text('선택한 자판기로 설정'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('kiosk-start-button')));
       await tester.pumpAndSettle();
       // Home first menu uses the normal Navigator path and inherited backend.
       await tester.tap(find.byKey(const ValueKey('menu-route-0')));
       await tester.pumpAndSettle();
       expect(find.byType(KioskProductListScreen), findsOneWidget);
-      expect(find.textContaining('기기 ID가 설정되지 않았습니다'), findsOneWidget);
+      expect(find.textContaining('승인된 테스트 환경 설정이 필요합니다'), findsOneWidget);
+      expect(paths, ['/api/v1/map/machines']);
       expect(find.text('대일밴드 뉴 표준형 20매'), findsNothing);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('기기 설정'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('기기 설정 열기'));
+      await tester.pumpAndSettle();
+      expect(find.text('설치 기기 변경'), findsOneWidget);
+      expect(find.textContaining('현재 기기: VM-001'), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(KioskStartScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

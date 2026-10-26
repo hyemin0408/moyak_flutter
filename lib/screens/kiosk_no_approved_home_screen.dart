@@ -1,3 +1,5 @@
+import '../widgets/kiosk_viewport.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -71,7 +73,7 @@ class KioskNoApprovedHomeScreen extends StatelessWidget {
     style: TextStyle(
       fontFamily: 'MenuInter',
       fontFamilyFallback: const ['MenuKorean'],
-      fontSize: size,
+      fontSize: kioskFontSize(size),
       fontWeight: weight,
       color: color,
       height: height,
@@ -100,267 +102,255 @@ class KioskNoApprovedHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: _background,
     body: SafeArea(
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-            width: 1080,
-            height: 1920,
-            child: Stack(
-              children: [
-                const Positioned.fill(child: ColoredBox(color: _background)),
-                const Positioned(
-                  left: 0,
-                  top: 0,
-                  width: 1080,
-                  height: 204,
-                  child: ColoredBox(color: Colors.white),
-                ),
-                Positioned(
-                  left: 64,
-                  top: 59,
-                  width: 91,
-                  height: 30,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: _yellow,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                ),
-                _slot(
-                  74,
-                  63,
-                  71,
-                  22,
-                  _text('모두의 약', 18, FontWeight.w800, color: _brown),
-                ),
-                _slot(167, 57, 52, 34, _text('모약', 28, FontWeight.w800)),
-                _slot(64, 99, 148, 48, _text('시작하기', 40, FontWeight.w800)),
-                _slot(
-                  228,
-                  108.5,
-                  378,
-                  29,
-                  _text(
-                    '|  원하시는 구매 방법을 선택해 주세요',
-                    24,
-                    FontWeight.w500,
-                    color: _muted,
-                  ),
-                ),
-                _slot(
-                  953,
-                  89,
-                  61,
-                  27,
-                  _text('한국어', 22, FontWeight.w600, color: _muted),
-                ),
-                Positioned(
-                  left: 1026,
-                  top: 89,
-                  width: 16,
-                  height: 16,
-                  child: SvgPicture.asset('assets/menu/chevron.svg'),
-                ),
-                Positioned(
-                  left: 895,
-                  top: 226,
-                  width: 170,
-                  height: 52,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF8E1),
-                      border: Border.all(color: _yellow),
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.person_outline,
-                              color: _brown,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 12),
-                            _text(
-                              memberName,
-                              26,
-                              FontWeight.w700,
-                              color: _brown,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 116,
-                  top: 344,
-                  width: 850,
-                  height: 188,
-                  child: Material(
-                    color: _yellow,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: const BorderSide(color: _brown, width: 4),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      key: const ValueKey('no-approved-banner'),
-                      onTap: () => _previewMessage(
-                        context,
-                        '현재 승인된 약이 없는 상태를 보여주는 예시 화면입니다. 실제 승인 조회는 연결되지 않았습니다.',
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            left: 60,
-                            top: 34,
-                            width: 96,
-                            height: 124,
-                            child: ClipRect(
-                              child: OverflowBox(
-                                alignment: Alignment.topLeft,
-                                minWidth: 192,
-                                maxWidth: 192,
-                                minHeight: 128,
-                                maxHeight: 128,
-                                child: Transform.translate(
-                                  offset: const Offset(-56, -5),
-                                  child: Image.asset(
-                                    'assets/moyak_character.png',
-                                    width: 192,
-                                    height: 128,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          _slot(
-                            184,
-                            44,
-                            488,
-                            54,
-                            _text(
-                              '아직 승인된 약이 없어요',
-                              44,
-                              FontWeight.w800,
-                              color: Colors.black,
-                            ),
-                          ),
-                          _slot(
-                            212,
-                            108,
-                            470,
-                            36,
-                            _text(
-                              '현재 수령할 수 있는 승인된 약이 없습니다.',
-                              28,
-                              FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                          Positioned(
-                            left: 712,
-                            top: 54,
-                            width: 84,
-                            height: 84,
-                            child: DecoratedBox(
-                              decoration: const BoxDecoration(
-                                color: _brown,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.arrow_forward,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                _slot(
-                  207,
-                  566,
-                  664,
-                  36,
-                  _text(
-                    '365일 24시간 스마트 비상 의약품 자판기 서비스 모두의 약입니다.',
-                    24,
-                    FontWeight.w500,
-                    color: _muted,
-                  ),
-                ),
-                Positioned(
-                  left: 927,
-                  top: 1700,
-                  width: 130,
-                  height: 44,
-                  child: TextButton(
-                    key: const ValueKey('no-approved-logout'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                    ),
-                    onPressed: () {
-                      if (onLogout != null) {
-                        onLogout!();
-                        return;
-                      }
-                      _previewMessage(
-                        context,
-                        '테스트용 로그아웃: 일반 홈으로 이동합니다. 실제 인증 세션 종료는 연결되지 않았습니다.',
-                      );
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const KioskMenuScreen(),
-                        ),
-                        (route) => route.isFirst,
-                      );
-                    },
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        '회원 로그아웃',
-                        maxLines: 1,
-                        softWrap: false,
-                        style: TextStyle(
-                          fontFamily: 'MenuInter',
-                          fontFamilyFallback: const ['MenuKorean'],
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFFFF4444),
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                _consultationCard(context),
-                Positioned(
-                  left: 0,
-                  top: 1758,
-                  width: 1080,
-                  height: 162,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border(top: BorderSide(color: Color(0xFFFFF3C4))),
-                    ),
-                  ),
-                ),
-              ],
+      child: KioskViewport(
+        child: KioskCanvas(
+          children: [
+            const Positioned.fill(child: ColoredBox(color: _background)),
+            const Positioned(
+              left: 0,
+              top: 0,
+              width: 1080,
+              height: 204,
+              child: ColoredBox(color: Colors.white),
             ),
-          ),
+            Positioned(
+              left: 64,
+              top: 59,
+              width: 91,
+              height: 30,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _yellow,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+            _slot(
+              74,
+              63,
+              71,
+              22,
+              _text('모두의 약', 18, FontWeight.w800, color: _brown),
+            ),
+            _slot(167, 57, 52, 34, _text('모약', 28, FontWeight.w800)),
+            _slot(64, 99, 148, 48, _text('시작하기', 40, FontWeight.w800)),
+            _slot(
+              228,
+              108.5,
+              378,
+              29,
+              _text(
+                '|  원하시는 구매 방법을 선택해 주세요',
+                24,
+                FontWeight.w500,
+                color: _muted,
+              ),
+            ),
+            _slot(
+              953,
+              89,
+              61,
+              27,
+              _text('한국어', 22, FontWeight.w600, color: _muted),
+            ),
+            Positioned(
+              left: 1026,
+              top: 89,
+              width: 16,
+              height: 16,
+              child: SvgPicture.asset('assets/menu/chevron.svg'),
+            ),
+            Positioned(
+              left: 895,
+              top: 226,
+              width: 170,
+              height: 52,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  border: Border.all(color: _yellow),
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.person_outline,
+                          color: _brown,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        _text(memberName, 26, FontWeight.w700, color: _brown),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 116,
+              top: 430,
+              width: 850,
+              height: 188,
+              child: Material(
+                color: _yellow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: _brown, width: 4),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  key: const ValueKey('no-approved-banner'),
+                  onTap: () => _previewMessage(
+                    context,
+                    '현재 승인된 약이 없는 상태를 보여주는 예시 화면입니다. 실제 승인 조회는 연결되지 않았습니다.',
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: 60,
+                        top: 34,
+                        width: 96,
+                        height: 124,
+                        child: ClipRect(
+                          child: OverflowBox(
+                            alignment: Alignment.topLeft,
+                            minWidth: 192,
+                            maxWidth: 192,
+                            minHeight: 128,
+                            maxHeight: 128,
+                            child: Transform.translate(
+                              offset: const Offset(-56, -5),
+                              child: Image.asset(
+                                'assets/moyak_character.png',
+                                width: 192,
+                                height: 128,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _slot(
+                        184,
+                        44,
+                        488,
+                        54,
+                        _text(
+                          '아직 승인된 약이 없어요',
+                          44,
+                          FontWeight.w800,
+                          color: Colors.black,
+                        ),
+                      ),
+                      _slot(
+                        212,
+                        108,
+                        470,
+                        36,
+                        _text(
+                          '현재 수령할 수 있는 승인된 약이 없습니다.',
+                          28,
+                          FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Positioned(
+                        left: 712,
+                        top: 54,
+                        width: 84,
+                        height: 84,
+                        child: DecoratedBox(
+                          decoration: const BoxDecoration(
+                            color: _brown,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            _slot(
+              207,
+              674,
+              664,
+              36,
+              _text(
+                '365일 24시간 스마트 비상 의약품 자판기 서비스 모두의 약입니다.',
+                24,
+                FontWeight.w500,
+                color: _muted,
+              ),
+            ),
+            Positioned(
+              left: 927,
+              top: 1700,
+              width: 130,
+              height: 44,
+              child: TextButton(
+                key: const ValueKey('no-approved-logout'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+                onPressed: () {
+                  if (onLogout != null) {
+                    onLogout!();
+                    return;
+                  }
+                  _previewMessage(
+                    context,
+                    '테스트용 로그아웃: 일반 홈으로 이동합니다. 실제 인증 세션 종료는 연결되지 않았습니다.',
+                  );
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const KioskMenuScreen(),
+                    ),
+                    (route) => route.isFirst,
+                  );
+                },
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '회원 로그아웃',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontFamily: 'MenuInter',
+                      fontFamilyFallback: const ['MenuKorean'],
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFFF4444),
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _consultationCard(context),
+            Positioned(
+              left: 0,
+              top: 1758,
+              width: 1080,
+              height: 162,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: Color(0xFFFFF3C4))),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ),
@@ -383,9 +373,9 @@ class KioskNoApprovedHomeScreen extends StatelessWidget {
         );
   Widget _consultationCard(BuildContext context) => Positioned(
     left: 64,
-    top: 673,
+    top: 860,
     width: 952,
-    height: 430,
+    height: 520,
     child: Container(
       padding: const EdgeInsets.all(48),
       decoration: BoxDecoration(
@@ -410,7 +400,7 @@ class KioskNoApprovedHomeScreen extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'MenuInter',
               fontFamilyFallback: ['MenuKorean'],
-              fontSize: 26,
+              fontSize: 30,
               color: _muted,
               height: 1.5,
             ),

@@ -1,0 +1,128 @@
+[
+  {
+    "item_seq": "196500043",
+    "item_name": "대일밴드 뉴 표준형 20매",
+    "company": "대일화학",
+    "has_photo": true
+  },
+  {
+    "item_seq": "202101234",
+    "item_name": "메디폼 H뷰티",
+    "company": "먼디파마",
+    "has_photo": true
+  },
+  {
+    "item_seq": "202209876",
+    "item_name": "KF94 보건용 마스크",
+    "company": "크린앤사이언스",
+    "has_photo": true
+  },
+  {
+    "item_seq": "199900001",
+    "item_name": "리스테린 구강청결제",
+    "company": "존슨앤드존슨",
+    "has_photo": true
+  },
+  {
+    "item_seq": "200300002",
+    "item_name": "알콜스왑",
+    "company": "더가든오브내추럴",
+    "has_photo": true
+  },
+  {
+    "item_seq": "200500003",
+    "item_name": "좋은느낌 생리대",
+    "company": "깨끗한나라",
+    "has_photo": true
+  },
+  {
+    "item_seq": "901000002",
+    "item_name": "대일밴드 방수형 10매",
+    "company": "대일화학",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000003",
+    "item_name": "대일밴드 어린이 캐릭터 15매",
+    "company": "대일화학",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000004",
+    "item_name": "메디폼 하이드로콜로이드 밴드 10매",
+    "company": "먼디파마",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000012",
+    "item_name": "소독용 에탄올 솜 200매",
+    "company": "제일퍼스트",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000021",
+    "item_name": "바세린 오리지널 50g",
+    "company": "유니레버",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000022",
+    "item_name": "바세린 립테라피 7g",
+    "company": "유니레버",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000031",
+    "item_name": "콘택트렌즈 다목적 용액 360ml",
+    "company": "바슈롬",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000032",
+    "item_name": "일회용 렌즈 세정액 15ml x5",
+    "company": "바슈롬",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000033",
+    "item_name": "의료용 안대 5매",
+    "company": "오공",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000042",
+    "item_name": "좋은느낌 대형 14매",
+    "company": "깨끗한나라",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000043",
+    "item_name": "좋은느낌 오버나이트 10매",
+    "company": "깨끗한나라",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000044",
+    "item_name": "순수한면 팬티라이너 40매",
+    "company": "엘지생활건강",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000052",
+    "item_name": "KF80 보건용 마스크 소형",
+    "company": "크린앤사이언스",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000053",
+    "item_name": "일회용 덴탈 마스크 50매",
+    "company": "웰킵스",
+    "has_photo": false
+  },
+  {
+    "item_seq": "901000062",
+    "item_name": "가그린 레귤러 100ml",
+    "company": "동아제약",
+    "has_photo": false
+  }
+]

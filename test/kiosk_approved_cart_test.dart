@@ -52,7 +52,8 @@ void main() {
         expect(find.text('2종류 (총 3개)'), findsOneWidget);
         expect(find.text('9,500원'), findsOneWidget);
         expect(find.text('승인 완료 · 예시'), findsNWidgets(2));
-        expect(find.text('이미지 준비 중'), findsNWidgets(2));
+        expect(find.byIcon(Icons.medication_outlined), findsNWidgets(2));
+        expect(find.text('사진 준비 중'), findsNothing);
         expect(find.byKey(const ValueKey('cart-add-products')), findsNothing);
         expect(tester.takeException(), isNull);
       }

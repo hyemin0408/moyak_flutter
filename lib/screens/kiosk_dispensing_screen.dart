@@ -106,7 +106,7 @@ class _KioskDispensingScreenState extends State<KioskDispensingScreen> {
         left: 64,
         top: 1290,
         width: 952,
-        height: 205,
+        height: 265,
         child: Container(
           decoration: KioskDispensingPreviewLayout.panel(),
           padding: const EdgeInsets.all(30),
@@ -137,7 +137,7 @@ class _KioskDispensingScreenState extends State<KioskDispensingScreen> {
       if (kDebugMode)
         Positioned(
           left: 310,
-          top: 1530,
+          top: 1610,
           width: 460,
           height: 90,
           child: KioskDispensingPreviewLayout.button(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../demo/demo_products.dart';
+import '../models/product_image_catalog.dart';
 import '../demo/demo_cart.dart';
 import 'kiosk_cart_screen.dart';
 import 'kiosk_payment_screen.dart';
@@ -34,12 +35,10 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
   static const _ink = Color(0xFF0F172A);
   static const _muted = Color(0xFF475569);
   static const _tabs = [
-    '전체',
-    '진통/해열제',
-    '소화/위장약',
-    '감기약/기침약',
-    '상처/연고',
-    '안대/밴드/기타',
+    (id: 0, label: '전체', width: 97.0),
+    (id: 4, label: '상처/연고', width: 146.0),
+    (id: 6, label: '여성용품', width: 146.0),
+    (id: 5, label: '안대/밴드/기타', width: 195.0),
   ];
   List<DemoProduct> get _products => _cart.products;
   final _search = TextEditingController();
@@ -340,33 +339,33 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
                       for (var index = 0; index < _tabs.length; index++) ...[
                         if (index > 0) const SizedBox(width: 16),
                         SizedBox(
-                          width: [
-                            97.0,
-                            166.0,
-                            166.0,
-                            187.0,
-                            146.0,
-                            195.0,
-                          ][index],
+                          width: _tabs[index].width,
                           height: 67,
                           child: Material(
-                            color: _category == index ? _yellow : _plate,
+                            color: _category == _tabs[index].id
+                                ? _yellow
+                                : _plate,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
-                                color: _category == index ? _yellow : _border,
+                                color: _category == _tabs[index].id
+                                    ? _yellow
+                                    : _border,
                               ),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
-                              key: ValueKey('product-category-$index'),
-                              onTap: () => setState(() => _category = index),
+                              key: ValueKey(
+                                'product-category-${_tabs[index].id}',
+                              ),
+                              onTap: () =>
+                                  setState(() => _category = _tabs[index].id),
                               child: Semantics(
-                                selected: _category == index,
+                                selected: _category == _tabs[index].id,
                                 button: true,
                                 child: Center(
                                   child: _text(
-                                    _tabs[index],
+                                    _tabs[index].label,
                                     22,
                                     weight: FontWeight.w700,
                                     color: _muted,
@@ -494,20 +493,27 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
 
   Widget _card(int index) {
     final product = _products[index];
-    const image = Icon(Icons.medication_outlined, size: 88, color: _gold);
+    const placeholder = Icon(Icons.medication_outlined, size: 88, color: _gold);
+    final asset = verifiedProductPhotoAsset(
+      itemSeq: product.itemSeq,
+      name: product.name,
+    );
+    final image = asset.isEmpty
+        ? placeholder
+        : Image.asset(
+            'assets/products/$asset',
+            fit: BoxFit.contain,
+            semanticLabel: '${product.name} 제품 사진',
+            errorBuilder: (_, _, _) => placeholder,
+          );
     return DecoratedBox(
       decoration: _decoration(),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
+        child: SizedBox(
           key: ValueKey('product-card-$index'),
-          onTap: () => _message(
-            _cart is LiveKioskCart
-                ? '${product.name}\n${product.company} · 품목코드 ${product.itemSeq}\n단가 ${product.priceLabel} · 재고 ${product.stock}개\n효능·용법 등 상세 정보 API는 아직 제공되지 않습니다.'
-                : '예시 제품 선택: ${product.name}',
-          ),
           child: Stack(
             children: [
               Positioned(
@@ -517,7 +523,7 @@ class _KioskProductListScreenState extends State<KioskProductListScreen> {
                 height: 204,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: image,
+                  child: ColoredBox(color: Colors.white, child: image),
                 ),
               ),
               _slot(

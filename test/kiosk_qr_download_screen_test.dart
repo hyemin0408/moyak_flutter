@@ -8,7 +8,7 @@ import 'package:moyak_flutter/screens/kiosk_usage_guide_screen.dart';
 
 void main() {
   testWidgets(
-    'QR placeholder and deferred pairing remain visible at different sizes',
+    'App installation illustration and pairing navigation fit different sizes',
     (tester) async {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -23,12 +23,15 @@ void main() {
           const MaterialApp(home: KioskQrDownloadScreen()),
         );
         await tester.pumpAndSettle();
-        expect(find.text('QR 코드 준비 중'), findsOneWidget);
-        expect(find.text('현재 스캔 불가'), findsOneWidget);
-        expect(find.text('QR 스캔 & 설치'), findsOneWidget);
+        expect(find.text('QR 코드 준비 중'), findsNothing);
+        expect(find.text('현재 스캔 불가'), findsNothing);
+        expect(find.text('모약이 앱 다운 받기'), findsNWidgets(2));
+        expect(find.byType(Image), findsOneWidget);
+        expect(find.text('설치를 완료했습니다'), findsOneWidget);
+        expect(find.text('모약 앱 설치'), findsOneWidget);
         expect(find.text('본인인증 완료'), findsOneWidget);
         expect(find.text('자판기 연동'), findsOneWidget);
-        expect(find.text("카메라로 스캔하여 마켓에서 '모약' 앱을 설치하세요."), findsOneWidget);
+        expect(find.text('휴대폰에 모약 앱을 설치해 주세요.'), findsOneWidget);
         for (final key in ['qr-pair-next', 'qr-back']) {
           final bounds = tester.getRect(find.byKey(ValueKey(key)));
           expect(bounds.left, greaterThanOrEqualTo(0));

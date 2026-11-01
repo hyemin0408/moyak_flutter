@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:moyak_flutter/main.dart';
+import 'package:moyak_flutter/demo/demo_products.dart';
 import 'package:moyak_flutter/models/moyak_api_models.dart';
 import 'package:moyak_flutter/screens/kiosk_product_list_screen.dart';
 import 'package:moyak_flutter/screens/kiosk_cart_screen.dart';
@@ -59,6 +60,55 @@ Widget app(KioskBackend b, Widget home) => KioskBackendScope(
 );
 
 void main() {
+  test(
+    'retired ethanol swabs cannot remain in the catalog or editable cart',
+    () async {
+      final b = backend(
+        MockClient((request) async {
+          expect(request.method, 'GET');
+          expect(request.url.path, '/vending/machines/test-machine/products');
+          return json([
+            {
+              ...product('retired'),
+              'item_seq': '901000012',
+              'item_name': '소독용 에탄올 솜 200매',
+            },
+            {
+              ...product('alcohol-swab'),
+              'item_seq': '200300002',
+              'item_name': '알콜스왑',
+            },
+          ]);
+        }),
+      );
+      addTearDown(b.api.close);
+      final cart = LiveKioskCart(b);
+      addTearDown(cart.dispose);
+      // Simulate an editable cart from before the catalog was refreshed.
+      cart.replaceProducts(const [
+        DemoProduct(
+          '소독용 에탄올 솜 200매',
+          '소독용품',
+          2500,
+          '2,500원',
+          '',
+          [],
+          0,
+          0,
+          id: 'retired',
+          itemSeq: '901000012',
+        ),
+      ]);
+      cart.add(0);
+      expect(await cart.load(), isTrue);
+      expect(cart.products.single.name, '알콜스왑');
+      expect(cart.productQuantities, isEmpty);
+      expect(cart.totalWon, 0);
+      cart.add(0);
+      expect(cart.productQuantities, {'alcohol-swab': 1});
+      expect(cart.totalWon, 1200);
+    },
+  );
   test('Missing machine and unapproved configuration make zero requests, including catalog seeding GET', () async {
     var calls = 0;
     final b = backend(
@@ -240,9 +290,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('서버 상품 a'), findsOneWidget);
       expect(find.text('대일밴드 뉴 표준형 20매'), findsNothing);
-      await tester.tap(find.byKey(const ValueKey('product-card-0')));
+      await tester.tap(
+        find.byKey(const ValueKey('product-card-0')),
+        warnIfMissed: false,
+      );
       await tester.pump();
-      expect(find.textContaining('상세 정보 API'), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
       await tester.tap(find.byKey(const ValueKey('add-product-0')));
       await tester.tap(find.byKey(const ValueKey('add-product-0')));
       await tester.tap(find.byKey(const ValueKey('complete-selection')));

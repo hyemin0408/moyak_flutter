@@ -136,7 +136,7 @@ class KioskQrDownloadScreen extends StatelessWidget {
               107.5,
               325,
               29,
-              _label('|  본인인증을 위한 QR 코드 안내', 24, color: _muted),
+              _label('|  본인인증을 위한 앱 설치 안내', 24, color: _muted),
             ),
             Positioned(
               left: 911,
@@ -159,71 +159,71 @@ class KioskQrDownloadScreen extends StatelessWidget {
               height: 16,
               child: SvgPicture.asset('assets/menu/chevron.svg'),
             ),
-            _slot(
-              433,
-              458,
-              214,
-              48,
-              _label('QR 다운로드', 40, color: _brown, weight: FontWeight.w800),
-            ),
-            _slot(
-              169,
-              522,
-              741,
-              31,
-              _label(
-                '아래 QR코드를 스마트폰 카메라로 스캔하여 전용 앱을 설치해주세요.',
-                26,
-                color: _muted,
+            Positioned(
+              left: 0,
+              top: 458,
+              width: 1080,
+              height: 48,
+              child: Center(
+                child: _label(
+                  '모약이 앱 다운 받기',
+                  40,
+                  color: _brown,
+                  weight: FontWeight.w800,
+                ),
               ),
             ),
             Positioned(
-              left: 360,
+              left: 0,
+              top: 522,
+              width: 1080,
+              height: 40,
+              child: Center(
+                child: _label(
+                  '휴대폰에 모약 앱을 설치한 후 본인인증을 진행해 주세요.',
+                  26,
+                  color: _muted,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 300,
               top: 626,
-              width: 360,
+              width: 480,
               height: 413,
               child: _panel(radius: 24, child: const SizedBox()),
             ),
             Positioned(
-              left: 400,
-              top: 666,
-              width: 280,
-              height: 280,
+              left: 350,
+              top: 650,
+              width: 380,
+              height: 300,
               child: Semantics(
-                label: '임시 QR 코드 영역, 현재 스캔 불가',
-                child: _panel(
-                  color: _plate,
-                  radius: 8,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'QR 코드 준비 중',
-                          style: _style(
-                            26,
-                            color: _brown,
-                            weight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text('현재 스캔 불가', style: _style(22, color: _muted)),
-                      ],
-                    ),
-                  ),
+                label: '모약이 앱 설치 안내 일러스트',
+                child: Image.asset(
+                  'assets/moyak_character.png',
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
-            _slot(
-              410.5,
-              970,
-              259,
-              29,
-              _label('스마트폰 전용 앱 다운로드', 24, color: _muted),
+            Positioned(
+              left: 300,
+              top: 970,
+              width: 480,
+              height: 40,
+              child: Center(
+                child: _label(
+                  '모약이 앱 다운 받기',
+                  32,
+                  color: _brown,
+                  weight: FontWeight.w700,
+                ),
+              ),
             ),
-            _step(43, 0, 'QR 스캔 & 설치', "카메라로 스캔하여 마켓에서 '모약' 앱을 설치하세요."),
-            _step(380, 1, '본인인증 완료', '앱 설치 후, 회원가입과 1회성 간편 본인인증을 마쳐주세요.'),
-            _step(714, 2, '자판기 연동', '인증이 끝나면 다음 화면의 자판기 QR 코드를 스캔하세요.'),
+            _step(43, 0, '모약 앱 설치', '휴대폰에 모약 앱을 설치해 주세요.'),
+            _step(380, 1, '본인인증 완료', '앱에서 회원가입 후 본인인증을 진행하세요.'),
+            _step(714, 2, '자판기 연동', '앱으로 기기 QR을 스캔해 주세요.'),
             Positioned(
               left: 249,
               top: 1375,
@@ -239,8 +239,8 @@ class KioskQrDownloadScreen extends StatelessWidget {
                   );
                 },
                 _label(
-                  '설치를 완료했습니다 (자판기 연동하기)',
-                  28,
+                  '설치를 완료했습니다',
+                  40,
                   color: _brown,
                   weight: FontWeight.w800,
                 ),
@@ -327,9 +327,9 @@ class KioskQrDownloadScreen extends StatelessWidget {
               Positioned(
                 left: 32,
                 top: 141,
-                width: 284,
+                width: 252,
                 height: 108,
-                child: Text(description, style: _style(24, color: _muted)),
+                child: Text(description, style: _style(22, color: _muted)),
               ),
             ],
           ),

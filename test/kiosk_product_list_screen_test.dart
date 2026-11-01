@@ -46,7 +46,7 @@ void main() {
     expect(
       find.byWidgetPredicate(
         (widget) =>
-            widget is InkWell &&
+            widget is SizedBox &&
             widget.key.toString().contains('product-card-'),
       ),
       findsNWidgets(6),
@@ -85,21 +85,40 @@ void main() {
     expect(find.text('검색 결과가 없습니다.'), findsOneWidget);
     await tester.enterText(find.byType(TextField), '');
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('product-card-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('product-card-0')), findsNothing);
     expect(find.byKey(const ValueKey('product-card-1')), findsOneWidget);
     expect(find.byKey(const ValueKey('product-card-4')), findsOneWidget);
     expect(find.byKey(const ValueKey('product-card-2')), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('product-category-1')));
+    expect(find.byKey(const ValueKey('product-category-1')), findsNothing);
+    expect(find.byKey(const ValueKey('product-category-2')), findsNothing);
+    expect(find.byKey(const ValueKey('product-category-3')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('product-category-5')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('product-card-2')), findsOneWidget);
+    expect(find.byKey(const ValueKey('product-card-1')), findsNothing);
+    expect(find.byKey(const ValueKey('product-card-5')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('product-category-6')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('product-card-5')), findsOneWidget);
+    expect(find.byKey(const ValueKey('product-card-2')), findsNothing);
+    await tester.enterText(find.byType(TextField), '마스크');
     await tester.pumpAndSettle();
     expect(find.text('검색 결과가 없습니다.'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '');
     await tester.tap(find.byKey(const ValueKey('product-category-0')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('add-product-0')));
     await tester.pumpAndSettle();
     expect(find.text('10,500원'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('product-card-0')));
+    ScaffoldMessenger.of(tester.element(find.byType(KioskProductListScreen)))
+        .removeCurrentSnackBar();
     await tester.pumpAndSettle();
-    expect(find.text('예시 제품 선택: 대일밴드 뉴 표준형 20매'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey('product-card-0')),
+      warnIfMissed: false,
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsNothing);
     await tester.tap(find.byKey(const ValueKey('complete-selection')));
     await tester.pumpAndSettle();
     expect(find.byType(KioskCartScreen), findsOneWidget);

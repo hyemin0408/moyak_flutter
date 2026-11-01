@@ -6,6 +6,7 @@ import '../demo/demo_cart.dart';
 import '../demo/demo_products.dart';
 import '../models/moyak_api_models.dart';
 import '../models/product_image_catalog.dart';
+import '../models/kiosk_product_categories.dart';
 import 'moyak_api_client.dart';
 import 'service_result.dart';
 import 'order_recovery_store.dart';
@@ -587,7 +588,14 @@ class LiveKioskCart extends DemoCart {
       switch (result) {
         case ServiceSuccess<List<KioskProduct>>():
           try {
-            replaceProducts(result.value.map(_present).toList());
+            // Retired from this kiosk catalog by request. Keep server data and
+            // recovered orders intact; only new catalog/cart selections exclude it.
+            replaceProducts(
+              result.value
+                  .where((p) => p.itemSeq.trim() != '901000012')
+                  .map(_present)
+                  .toList(),
+            );
             error = null;
           } on ArgumentError {
             error = '서버 상품 ID가 중복되거나 올바르지 않습니다.';
@@ -659,23 +667,20 @@ class LiveKioskCart extends DemoCart {
   }
 
   static DemoProduct _present(KioskProduct p) {
-    const categories = [
-      '전체',
-      '진통/해열제',
-      '소화/위장약',
-      '감기약/기침약',
-      '상처/연고',
-      '안대/밴드/기타',
-    ];
     // Exact known catalog names only; unknown items never borrow another drug's image.
     final known = demoProducts.where((d) => d.name == p.name).firstOrNull;
     return DemoProduct(
-      p.name,
+      productDisplayName(itemSeq: p.itemSeq, name: p.name),
       p.badge,
       p.price,
       '${p.price.toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}원',
       productImageAsset(itemSeq: p.itemSeq, name: p.name),
-      [if (categories.indexOf(p.category) > 0) categories.indexOf(p.category)],
+      kioskProductCategories(
+        itemSeq: p.itemSeq,
+        name: p.name,
+        serverCategory: p.category,
+        badge: p.badge,
+      ),
       known?.imageX ?? 45,
       known?.imageY ?? 12,
       id: p.id,

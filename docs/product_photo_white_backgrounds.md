@@ -60,3 +60,5 @@ silhouette with solid pure white #FFFFFF. Do not redraw, enhance, relight,
 straighten, redesign or invent any of the product, letters, numbers or cap.
 Do not upscale product details into invented text. Preserve the whole bottle
 uncropped at the same relative position and scale as the input.
+
+2026-11-02: Built-in image_gen edit: remove only top-right '유한킴벌리 직영' overlay; preserve product package, text, framing and white background. Original: assets/products/좋은느낌 대형 14매.png. App asset: assets/products/goodfeel_large_14_clean.png. Visually inspected; original retained. Included in moyak-kiosk-20261102.apk; image catalog tests: 7 passed.
